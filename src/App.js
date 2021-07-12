@@ -1,8 +1,8 @@
 import "./App.css";
-import { data } from "./Data";
 import MUIDataTable from "mui-datatables";
 import { Grid, TextField } from "@material-ui/core";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 const defaultOption = {
   filter: true,
   filterType: "textField",
@@ -82,14 +82,20 @@ const defaultCols = [
   },
 ];
 function App() {
+  const [data, setData] = useState([]);
   const [col, setCol] = useState(defaultCols);
   const [lesserThanAPY, setLesserThanAPY] = useState("");
   const [lesserThanTVL, setlesserThanTVL] = useState("");
   const [greaterThanAPY, setGreaterThanAPY] = useState("");
   const [greaterThanTVL, setGreaterThanTVL] = useState("");
 
-  /** Filter APY */
+  useEffect(() => {
+    axios.get(process.env.REACT_APP_DATAFILEPATH).then((res) => {
+      setData(res.data);
+    });
+  }, []);
 
+  /** Filter APY */
   const option = {
     filterType: "checkbox",
     print: false,
