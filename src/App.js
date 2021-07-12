@@ -50,7 +50,7 @@ const defaultCols = [
     name: "apy",
     label: "apy",
     options: {
-      filter: true,
+      filter: false,
       filterType: "textField",
       filterOptions: {
         logic: (location, filters, row) => {
@@ -67,7 +67,7 @@ const defaultCols = [
     name: "tvl",
     label: "tvl",
     options: {
-      filter: true,
+      filter: false,
       filterType: "textField",
       filterOptions: {
         logic: (location, filters, row) => {
@@ -116,11 +116,16 @@ function App() {
         }
       });
       setCol(newCol);
+      if (type === "lesser than") {
+        setLesserThanAPY(value);
+      } else {
+        setGreaterThanAPY(value);
+      }
       return;
     }
     if (type === "lesser than") {
       const Strcuture = {
-        filter: true,
+        filter: false,
         filterType: "textField",
         filterList: [value],
         filterOptions: {
@@ -143,7 +148,7 @@ function App() {
       setCol(newCol);
     } else {
       const Strcuture = {
-        filter: true,
+        filter: false,
         filterType: "textField",
         filterList: [value],
         filterOptions: {
@@ -175,12 +180,17 @@ function App() {
           cols.options = defaultOption;
         }
       });
+      if (type === "lesser than") {
+        setlesserThanTVL(value);
+      } else {
+        setGreaterThanTVL(value);
+      }
       setCol(newCol);
       return;
     }
     if (type === "lesser than") {
       const Strcuture = {
-        filter: true,
+        filter: false,
         filterType: "textField",
         filterList: [value],
         filterOptions: {
@@ -203,7 +213,7 @@ function App() {
       setCol(newCol);
     } else {
       const Strcuture = {
-        filter: true,
+        filter: false,
         filterType: "textField",
         filterList: [value],
         filterOptions: {
