@@ -3,6 +3,10 @@ import MUIDataTable from "mui-datatables";
 import { Grid, TextField } from "@material-ui/core";
 import { useEffect, useState } from "react";
 import axios from "axios";
+
+let results_file = typeof window.ENV.results_file === "undefined" ? null : window.ENV.results_file; 
+
+
 const defaultOption = {
   filter: true,
   filterType: "textField",
@@ -90,7 +94,8 @@ function App() {
   const [greaterThanTVL, setGreaterThanTVL] = useState("");
 
   useEffect(() => {
-    axios.get(process.env.REACT_APP_DATAFILEPATH).then((res) => {
+    let url = results_file +"?t="+new Date().getTime();
+    axios.get(url).then((res) => {
       setData(res.data);
     });
   }, []);
