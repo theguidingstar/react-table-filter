@@ -19,6 +19,9 @@ h4 {
 .cta-button {
   height: 100%;
 }
+.MuiGrid-align-items-xs-center {
+  align-items: initial !important;
+}
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
