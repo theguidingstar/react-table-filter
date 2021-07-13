@@ -32,6 +32,7 @@ const defaultCols = [
     options: {
       filter: true,
       sort: false,
+      filterType: 'checkbox'
     },
   },
   {
@@ -40,6 +41,7 @@ const defaultCols = [
     options: {
       filter: true,
       sort: false,
+      filterType: 'checkbox'
     },
   },
   {
@@ -165,6 +167,7 @@ function App() {
 
   const option = {
     filterType: "none",
+    selectableRows:false,
     print: false,
     download: false,
     viewColumns: false,
@@ -238,11 +241,11 @@ function App() {
           render: (v) => {
             let text;
             if (value && value.less && value.more) {
-              text = value.less + "> apy >" + value.more;
+              text = value.less + "< apy <" + value.more;
             } else if (value && value.less) {
-              text = value.less + "> apy";
+              text = value.less + "< apy";
             } else if (value && value.more) {
-              text = "apy >" + value.more;
+              text = "apy <" + value.more;
             }
             return text;
           },
@@ -299,11 +302,11 @@ function App() {
           render: (v) => {
             let text;
             if (value && value.less && value.more) {
-              text = value.less + "> tvl >" + value.more;
+              text = value.less + "< tvl <" + value.more;
             } else if (value && value.less) {
-              text = value.less + "> tvl";
+              text = value.less + "< tvl";
             } else if (value && value.more) {
-              text = "tvl >" + value.more;
+              text = "tvl <" + value.more;
             }
             return text;
           },
@@ -345,7 +348,7 @@ function App() {
               value={lesserThanAPY}
               onChange={(e) => setLesserThanAPY(e.target.value)}
             />{" "}
-            &nbsp; <h4> {"> APY >"} </h4> &nbsp; &nbsp;
+            &nbsp; <h4> {"< APY <"} </h4> &nbsp; &nbsp;
             <TextField
               id="outlined-basic"
               className="input-text-filter"
@@ -364,7 +367,7 @@ function App() {
               value={lesserThanTVL}
               onChange={(e) => setLesserThanTVL(e.target.value)}
             />
-            <h4> &nbsp; {"> TVL >"} </h4> &nbsp; &nbsp;
+            <h4> &nbsp; {"< TVL <"} </h4> &nbsp; &nbsp;
             <TextField
               id="outlined-basic"
               className="input-text-filter"
