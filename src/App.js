@@ -243,9 +243,9 @@ function App() {
             if (value && value.less && value.more) {
               text = value.less + "< apy <" + value.more;
             } else if (value && value.less) {
-              text = value.less + "< apy";
+              text = value.less + "> apy";
             } else if (value && value.more) {
-              text = "apy <" + value.more;
+              text = "apy >" + value.more;
             }
             return text;
           },
@@ -304,9 +304,9 @@ function App() {
             if (value && value.less && value.more) {
               text = value.less + "< tvl <" + value.more;
             } else if (value && value.less) {
-              text = value.less + "< tvl";
+              text = value.less + "> tvl";
             } else if (value && value.more) {
-              text = "tvl <" + value.more;
+              text = "tvl >" + value.more;
             }
             return text;
           },
