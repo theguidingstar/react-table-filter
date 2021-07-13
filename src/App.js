@@ -32,7 +32,7 @@ const defaultCols = [
     options: {
       filter: true,
       sort: false,
-      filterType: 'checkbox'
+      filterType: "checkbox",
     },
   },
   {
@@ -41,7 +41,7 @@ const defaultCols = [
     options: {
       filter: true,
       sort: false,
-      filterType: 'checkbox'
+      filterType: "checkbox",
     },
   },
   {
@@ -167,7 +167,7 @@ function App() {
 
   const option = {
     filterType: "none",
-    selectableRows:false,
+    selectableRows: false,
     print: false,
     download: false,
     viewColumns: false,
@@ -241,9 +241,9 @@ function App() {
           render: (v) => {
             let text;
             if (value && value.less && value.more) {
-              text = value.less + "< apy <" + value.more;
+              text = value.more + "< apy <" + value.less;
             } else if (value && value.less) {
-              text = value.less + "< apy";
+              text = "apy < " + value.less ;
             } else if (value && value.more) {
               text = "apy >" + value.more;
             }
@@ -264,7 +264,7 @@ function App() {
       if (lesserThanTVL !== "") {
         value.less = lesserThanTVL;
       }
-      if (greaterThanAPY !== "") {
+      if (greaterThanTVL !== "") {
         value.more = greaterThanTVL;
       }
       const Strcuture = {
@@ -274,9 +274,9 @@ function App() {
         filterOptions: {
           logic: (location, filters, row) => {
             if (
-              row[3] === "" ||
-              row[3] === undefined ||
-              isNaN(parseFloat(row[3]))
+              row[4] === "" ||
+              row[4] === undefined ||
+              isNaN(parseFloat(row[4]))
             ) {
               return true;
             }
@@ -302,11 +302,11 @@ function App() {
           render: (v) => {
             let text;
             if (value && value.less && value.more) {
-              text = value.less + "< tvl <" + value.more;
+              text = value.more + "< tvl <" + value.less;
             } else if (value && value.less) {
-              text = value.less + "< tvl";
+              text = "tvl < " + value.less ;
             } else if (value && value.more) {
-              text = "tvl >" + value.more;
+              text = "tvl > " + value.more;
             }
             return text;
           },
@@ -342,20 +342,20 @@ function App() {
           <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
             <TextField
               id="outlined-basic"
+              className="input-text-filter"
               variant="outlined"
               placeholder="0"
-              className="input-text-filter"
-              value={lesserThanAPY}
-              onChange={(e) => setLesserThanAPY(e.target.value)}
-            />{" "}
+              value={greaterThanAPY}
+              onChange={(e) => setGreaterThanAPY(e.target.value)}
+            />
             &nbsp; <h4> {"< APY <"} </h4> &nbsp; &nbsp;
             <TextField
               id="outlined-basic"
-              className="input-text-filter"
               variant="outlined"
               placeholder="100"
-              value={greaterThanAPY}
-              onChange={(e) => setGreaterThanAPY(e.target.value)}
+              className="input-text-filter"
+              value={lesserThanAPY}
+              onChange={(e) => setLesserThanAPY(e.target.value)}
             />
           </Grid>
           <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
@@ -364,8 +364,8 @@ function App() {
               className="input-text-filter"
               placeholder="0"
               variant="outlined"
-              value={lesserThanTVL}
-              onChange={(e) => setLesserThanTVL(e.target.value)}
+              value={greaterThanTVL}
+              onChange={(e) => setGreaterThanTVL(e.target.value)}
             />
             <h4> &nbsp; {"< TVL <"} </h4> &nbsp; &nbsp;
             <TextField
@@ -373,8 +373,8 @@ function App() {
               className="input-text-filter"
               placeholder="100"
               variant="outlined"
-              value={greaterThanTVL}
-              onChange={(e) => setGreaterThanTVL(e.target.value)}
+              value={lesserThanTVL}
+              onChange={(e) => setLesserThanTVL(e.target.value)}
             />
           </Grid>
           <Grid item xs={12} sm={12} md={2} lg={2} spacing={2}>
