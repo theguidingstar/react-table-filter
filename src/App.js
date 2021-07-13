@@ -1,15 +1,17 @@
 import "./App.css";
 import MUIDataTable from "mui-datatables";
-import { Grid, TextField } from "@material-ui/core";
+import { Button, Grid, TextField } from "@material-ui/core";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import Header from "./Header"
+import Header from "./Header";
 
-let results_file = typeof window.ENV.results_file === "undefined" ? null : window.ENV.results_file; 
-
+let results_file =
+  typeof window.ENV.results_file === "undefined"
+    ? null
+    : window.ENV.results_file;
 
 const defaultOption = {
-  filter: true,
+  filter: false,
   filterType: "textField",
   filterList: [],
   filterOptions: {
@@ -28,11 +30,8 @@ const defaultCols = [
     name: "chain",
     label: "chain",
     options: {
-      filter: false,
+      filter: true,
       sort: false,
-      filterOptions: {
-        fullWidth: true,
-      },
     },
   },
   {
@@ -96,69 +95,66 @@ function App() {
   const [logged_in, setLoggedIn] = useState(false);
 
   useEffect(() => {
-
     function toHex(s) {
-        // utf8 to latin1
-        var s = unescape(encodeURIComponent(s))
-        var h = ''
-        for (var i = 0; i < s.length; i++) {
-            h += s.charCodeAt(i).toString(16)
-        }
-        return h;
+      // utf8 to latin1
+      var s = unescape(encodeURIComponent(s));
+      var h = "";
+      for (var i = 0; i < s.length; i++) {
+        h += s.charCodeAt(i).toString(16);
+      }
+      return h;
     }
 
-    function setCookie(name,value,days) {
-        var expires = "";
-        if (days) {
-            var date = new Date();
-            date.setTime(date.getTime() + (days*24*60*60*1000));
-            expires = "; expires=" + date.toUTCString();
-        }
-        document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+    function setCookie(name, value, days) {
+      var expires = "";
+      if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+        expires = "; expires=" + date.toUTCString();
+      }
+      document.cookie = name + "=" + (value || "") + expires + "; path=/";
     }
 
-    const login = async function() {
-
-      if (typeof window.ethereum == 'undefined') {
-          alert("MetaMask isn't installed!");
-          return;
+    const login = async function () {
+      if (typeof window.ethereum == "undefined") {
+        alert("MetaMask isn't installed!");
+        return;
       }
 
-      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const accounts = await window.ethereum.request({
+        method: "eth_requestAccounts",
+      });
       const account = accounts[0];
 
-      var response = await fetch('nonce',
-          {
-              body: JSON.stringify({"publickey": account}),
-              headers: {
-                  'Content-Type': 'application/json'
-              },
-              method: 'POST'
-          });
+      var response = await fetch("nonce", {
+        body: JSON.stringify({ publickey: account }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+      });
 
       const nonce = await response.text();
       var params = [toHex("signing nonce: " + nonce), account];
-      var sig = await window.ethereum.request({method: "personal_sign",
-                    params});
+      var sig = await window.ethereum.request({
+        method: "personal_sign",
+        params,
+      });
 
-      response = await fetch('getcookie',
-          {
-              body: JSON.stringify({"publickey": account, "sig": sig}),
-              headers: {
-                  'Content-Type': 'application/json'
-              },
-              method: 'POST'
-          });
+      response = await fetch("getcookie", {
+        body: JSON.stringify({ publickey: account, sig: sig }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+      });
 
       setCookie("c", await response.text(), 2);
       setLoggedIn(true);
-    }
+    };
 
-  login();
-
-
+    login();
   }, []);
-
 
   useEffect(() => {
     let url = results_file +"?t="+new Date().getTime();
@@ -166,219 +162,239 @@ function App() {
       setData(res.data);
     });
   }, []);
-  
 
-  /** Filter APY */
   const option = {
-    filterType: "checkbox",
+    filterType: "none",
     print: false,
     download: false,
     viewColumns: false,
     onFilterChipClose: (index) => clearTexts(index),
   };
   const clearTexts = (index) => {
+    let newCol = [...col];
     if (index === 3) {
       setLesserThanAPY("");
       setGreaterThanAPY("");
+      newCol.forEach((cols) => {
+        if (cols.name === "apy") {
+          cols.options = defaultOption;
+        }
+      });
     } else if (index === 4) {
       setGreaterThanTVL("");
       setLesserThanTVL("");
+      newCol.forEach((cols) => {
+        if (cols.name === "tvl") {
+          cols.options = defaultOption;
+        }
+      });
     }
+    setCol(newCol);
     return index;
   };
-  const changeApy = (type, value) => {
-    if (value === "") {
-      let newCol = [...col];
-      newCol.forEach((cols) => {
-        if (cols.name === "apy") {
-          cols.options = defaultOption;
-        }
-      });
-      setCol(newCol);
-      if (type === "lesser than") {
-        setLesserThanAPY(value);
-      } else {
-        setGreaterThanAPY(value);
-      }
-      return;
-    }
-    if (type === "lesser than") {
-      const Strcuture = {
-        filter: false,
-        filterType: "textField",
-        filterList: [value],
-        filterOptions: {
-          logic: (location, filters, row) => {
-            if (parseFloat(row[3]) > parseFloat(filters[0])) {
-              return true;
-            } else return false;
-          },
-        },
-        customFilterListOptions: { render: (v) => `APY ${type} ${v}` },
-        sort: false,
-      };
-      let newCol = [...col];
-      newCol.forEach((cols) => {
-        if (cols.name === "apy") {
-          cols.options = Strcuture;
-        }
-      });
-      setLesserThanAPY(value);
-      setCol(newCol);
-    } else {
-      const Strcuture = {
-        filter: false,
-        filterType: "textField",
-        filterList: [value],
-        filterOptions: {
-          logic: (location, filters, row) => {
-            if (parseFloat(row[3]) < parseFloat(filters[0])) {
-              return true;
-            } else return false;
-          },
-        },
-        customFilterListOptions: { render: (v) => `APY ${type} ${v}` },
-        sort: false,
-      };
-      let newCol = [...col];
-      newCol.forEach((cols) => {
-        if (cols.name === "apy") {
-          cols.options = Strcuture;
-        }
-      });
-      setGreaterThanAPY(value);
-      setCol(newCol);
-    }
-  };
 
-  const changeTVL = (type, value) => {
-    if (value === "") {
-      let newCol = [...col];
+  const applyFilter = () => {
+    let newCol = [...col];
+    if (lesserThanAPY !== "" || greaterThanAPY !== "") {
+      let value = {};
+      if (lesserThanAPY !== "") {
+        value.less = lesserThanAPY;
+      }
+      if (greaterThanAPY !== "") {
+        value.more = greaterThanAPY;
+      }
+      const Strcuture = {
+        filter: false,
+        filterType: "textField",
+        filterList: [value],
+        filterOptions: {
+          logic: (location, filters, row) => {
+            if (
+              row[3] === "" ||
+              row[3] === undefined ||
+              isNaN(parseFloat(row[3]))
+            ) {
+              return true;
+            }
+            if (value && value.less && value.more) {
+              if (
+                parseFloat(row[3]) < parseFloat(filters[0].less) &&
+                parseFloat(row[3]) > parseFloat(filters[0].more)
+              ) {
+                return false;
+              } else return true;
+            } else if (value && value.less) {
+              if (parseFloat(row[3]) < parseFloat(filters[0].less)) {
+                return false;
+              } else return true;
+            } else if (value && value.more) {
+              if (parseFloat(row[3]) > parseFloat(filters[0].more)) {
+                return false;
+              } else return true;
+            }
+          },
+        },
+        customFilterListOptions: {
+          render: (v) => {
+            let text;
+            if (value && value.less && value.more) {
+              text = value.less + "> apy >" + value.more;
+            } else if (value && value.less) {
+              text = value.less + "> apy";
+            } else if (value && value.more) {
+              text = "apy >" + value.more;
+            }
+            return text;
+          },
+        },
+        sort: false,
+      };
+
       newCol.forEach((cols) => {
         if (cols.name === "apy") {
-          cols.options = defaultOption;
+          cols.options = Strcuture;
         }
       });
-      if (type === "lesser than") {
-        setLesserThanTVL(value);
-      } else {
-        setGreaterThanTVL(value);
+    }
+    if (lesserThanTVL !== "" || greaterThanTVL !== "") {
+      let value = {};
+      if (lesserThanTVL !== "") {
+        value.less = lesserThanTVL;
       }
-      setCol(newCol);
-      return;
-    }
-    if (type === "lesser than") {
+      if (greaterThanAPY !== "") {
+        value.more = greaterThanTVL;
+      }
       const Strcuture = {
         filter: false,
         filterType: "textField",
         filterList: [value],
         filterOptions: {
           logic: (location, filters, row) => {
-            if (parseFloat(row[4]) > parseFloat(filters[0])) {
+            if (
+              row[3] === "" ||
+              row[3] === undefined ||
+              isNaN(parseFloat(row[3]))
+            ) {
               return true;
-            } else return false;
+            }
+            if (value && value.less && value.more) {
+              if (
+                parseFloat(row[4]) < parseFloat(filters[0].less) &&
+                parseFloat(row[4]) > parseFloat(filters[0].more)
+              ) {
+                return false;
+              } else return true;
+            } else if (value && value.less) {
+              if (parseFloat(row[4]) < parseFloat(filters[0].less)) {
+                return false;
+              } else return true;
+            } else if (value && value.more) {
+              if (parseFloat(row[4]) > parseFloat(filters[0].more)) {
+                return false;
+              } else return true;
+            }
           },
         },
-        customFilterListOptions: { render: (v) => `tvl ${type} ${v}` },
+        customFilterListOptions: {
+          render: (v) => {
+            let text;
+            if (value && value.less && value.more) {
+              text = value.less + "> tvl >" + value.more;
+            } else if (value && value.less) {
+              text = value.less + "> tvl";
+            } else if (value && value.more) {
+              text = "tvl >" + value.more;
+            }
+            return text;
+          },
+        },
         sort: false,
       };
-      let newCol = [...col];
+
       newCol.forEach((cols) => {
         if (cols.name === "tvl") {
           cols.options = Strcuture;
         }
       });
-      setLesserThanTVL(value);
-      setCol(newCol);
-    } else {
-      const Strcuture = {
-        filter: false,
-        filterType: "textField",
-        filterList: [value],
-        filterOptions: {
-          logic: (location, filters, row) => {
-            if (parseFloat(row[4]) < parseFloat(filters[0])) {
-              return true;
-            } else return false;
-          },
-        },
-        customFilterListOptions: { render: (v) => `tvl ${type} ${v}` },
-        sort: false,
-      };
-      let newCol = [...col];
-      newCol.forEach((cols) => {
-        if (cols.name === "tvl") {
-          cols.options = Strcuture;
-        }
-      });
-      setGreaterThanTVL(value);
-      setCol(newCol);
     }
+    setCol(newCol);
   };
 
   const LoginMessage = () => {
     return (
-        <>
-            <p class="bottom">Please sign the message with your public key</p>
-        </>
-    )
-  }  
-
+      <>
+        <p class="bottom">Please sign the message with your public key</p>
+      </>
+    );
+  };
 
   const LoggedInView = () => {
-      return (
-          <>
-            <Grid container spacing={5} style={{ padding: 20 }}>
-              <Grid item xs={4} spacing={2} justifyContent="space-between">
-                <h3>Filters </h3>
-              </Grid>
-              <Grid item xs={4} spacing={2} justifyContent="space-between">
-                <TextField
-                  id="outlined-basic"
-                  label="APY Lesser than"
-                  variant="outlined"
-                  value={lesserThanAPY}
-                  onChange={(e) => changeApy("lesser than", e.target.value)}
-                />{" "}
-                &nbsp;
-                <TextField
-                  id="outlined-basic"
-                  label="APY Greater than"
-                  variant="outlined"
-                  value={greaterThanAPY}
-                  onChange={(e) => changeApy("greater than", e.target.value)}
-                />{" "}
-                &nbsp;
-              </Grid>
-              <Grid item xs={4} spacing={2}>
-                <TextField
-                  id="outlined-basic"
-                  label="tvl Lesser than"
-                  variant="outlined"
-                  value={lesserThanTVL}
-                  onChange={(e) => changeTVL("lesser than", e.target.value)}
-                />{" "}
-                &nbsp;
-                <TextField
-                  id="outlined-basic"
-                  label="tvl Greate than"
-                  variant="outlined"
-                  value={greaterThanTVL}
-                  onChange={(e) => changeTVL("greater than", e.target.value)}
-                />{" "}
-                &nbsp;
-              </Grid>
-            </Grid>
-            <MUIDataTable data={data} columns={col} options={option} />
-          </>
-      )
-  }
-
+    return (
+      <>
+        <br />
+        <Grid container spacing={5} style={{ padding: 20 }}>
+          <Grid item xs={12} sm={12} md={2} lg={2} spacing={2}>
+            <h3>Filters </h3>
+          </Grid>
+          <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
+            <TextField
+              id="outlined-basic"
+              variant="outlined"
+              placeholder="0"
+              className="input-text-filter"
+              value={lesserThanAPY}
+              onChange={(e) => setLesserThanAPY(e.target.value)}
+            />{" "}
+            &nbsp; <h4> {"> APY >"} </h4> &nbsp; &nbsp;
+            <TextField
+              id="outlined-basic"
+              className="input-text-filter"
+              variant="outlined"
+              placeholder="100"
+              value={greaterThanAPY}
+              onChange={(e) => setGreaterThanAPY(e.target.value)}
+            />
+          </Grid>
+          <Grid item xs={12} sm={12} md={4} lg={4} spacing={2}>
+            <TextField
+              id="outlined-basic"
+              className="input-text-filter"
+              placeholder="0"
+              variant="outlined"
+              value={lesserThanTVL}
+              onChange={(e) => setLesserThanTVL(e.target.value)}
+            />
+            <h4> &nbsp; {"> TVL >"} </h4> &nbsp; &nbsp;
+            <TextField
+              id="outlined-basic"
+              className="input-text-filter"
+              placeholder="100"
+              variant="outlined"
+              value={greaterThanTVL}
+              onChange={(e) => setGreaterThanTVL(e.target.value)}
+            />
+          </Grid>
+          <Grid item xs={12} sm={12} md={2} lg={2} spacing={2}>
+            <Button
+              className="cta-button"
+              variant="contained"
+              color="primary"
+              onClick={(e) => applyFilter()}
+            >
+              Apply Filter
+            </Button>
+          </Grid>
+        </Grid>
+        <MUIDataTable data={data} columns={col} options={option} />
+      </>
+    );
+  };
 
   return (
     <>
-      <Header/>
-      { (logged_in) ? LoggedInView() : LoginMessage() }
+      <Header />
+      <br />
+      {logged_in ? LoggedInView() : LoginMessage()}
     </>
   );
 }

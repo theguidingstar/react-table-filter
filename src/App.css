@@ -10,6 +10,15 @@ body {
   pointer-events: none;
 }
 
+h4 {
+  display: inline-block;
+}
+.input-text-filter {
+  width: 80px;
+}
+.cta-button {
+  height: 100%;
+}
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
