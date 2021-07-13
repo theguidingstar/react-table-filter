@@ -5,10 +5,10 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Header from "./Header";
 
-let results_file =
-  typeof window.ENV.results_file === "undefined"
-    ? null
-    : window.ENV.results_file;
+// let results_file =
+//   typeof window.ENV.results_file === "undefined"
+//     ? null
+//     : window.ENV.results_file;
 
 const defaultOption = {
   filter: false,
@@ -22,7 +22,7 @@ const defaultOption = {
     },
   },
   customFilterListOptions: { render: (v) => `Greater than: ${v}` },
-  sort: false,
+  sort: true,
 };
 
 const defaultCols = [
