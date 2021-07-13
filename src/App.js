@@ -250,7 +250,7 @@ function App() {
             return text;
           },
         },
-        sort: false,
+        sort: true,
       };
 
       newCol.forEach((cols) => {
@@ -311,7 +311,7 @@ function App() {
             return text;
           },
         },
-        sort: false,
+        sort: true,
       };
 
       newCol.forEach((cols) => {
